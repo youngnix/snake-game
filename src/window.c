@@ -1,13 +1,13 @@
 #include "game.h"
-#include "window.h"
 #include "renderer.h"
+#include "window.h"
 
-SDL_Window* root_window;
+SDL_Window* main_window;
 
-int windowSetup(SDL_Window* window, const char* title, unsigned int width, unsigned int height){
-	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
+int windowSetup(SDL_Window** window, const char* title, unsigned int width, unsigned int height){
+	*window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
 
-	if(window == (void*)0){
+	if(*window == NULL){
 		printf("Window error: %s\n", SDL_GetError());
 		gameCleanUp();
 		SDL_Quit();

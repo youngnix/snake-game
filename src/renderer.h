@@ -3,8 +3,8 @@
 
 #include <SDL2/SDL.h>
 
-extern SDL_Renderer* root_renderer;
+extern SDL_Renderer* main_renderer;
 
-int rendererSetup(SDL_Renderer* renderer, SDL_Window* window);
+int rendererSetup(SDL_Renderer** renderer, SDL_Window** window);
 
 #endif
