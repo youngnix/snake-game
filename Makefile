@@ -1,6 +1,6 @@
 CC = clang
 CFLAGS = -Wall -g
-SRC = src/main.c src/renderer.c src/window.c src/game.c
+SRC = src/game.c src/keyboard.c src/fruit.c src/main.c src/player.c src/renderer.c src/snake.c src/window.c
 OUT = output
 OBJ = $(SRC:.c=.o)
 LFLAGS = -lSDL2main -lSDL2
