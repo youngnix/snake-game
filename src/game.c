@@ -1,18 +1,23 @@
 #include "game.h"
-#include "fruit.h"
+#include "food.h"
+#include "linked_list.h"
 #include "renderer.h"
 #include "snake.h"
 #include "window.h"
 #include "player.h"
 #include "keyboard.h"
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
 #include <stdlib.h>
 
-const unsigned int GAME_AREA_WIDTH = 24;
-const unsigned int GAME_AREA_HEIGHT = 12;
+const unsigned int GAME_AREA_WIDTH = 12;
+const unsigned int GAME_AREA_HEIGHT = 8;
 
-static Game game = { 0 };
+static char* food_sprite_list[] = { "res/apple.png", "res/cow.png", "res/python.png" };
+static const unsigned int FOOD_SPRITE_LIST_SIZE = 3;
+
+Game game = { 0 };
 
 int gameSetup(){
 	game.is_running = 1;
@@ -22,14 +27,21 @@ int gameSetup(){
 		return 1;
 	}
 
-	windowSetup(&main_window, "Title", 1280, 720);
+	windowSetup(&main_window, MAIN_WINDOW_TITLE, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 	rendererSetup(&main_renderer, &main_window);
-
 	keyboardSetup();
 
-	snakeSetup(&player_snake_head);
+	for(int i = 0; i < 2; i++){
+		addLinkedListTailNode(&player_head, createSnakeData(0, 0, 0));
+	}
 
-	game.fruit = createFruit(rand() % GAME_AREA_WIDTH + 1, rand() % GAME_AREA_HEIGHT + 1);
+	for(int i = 0; i < FOOD_SPRITE_LIST_SIZE; i++){
+		addLinkedListTailNode(&game.food_texture_head, IMG_LoadTexture(main_renderer, food_sprite_list[i]));
+	}
+
+	for(int i = 0; i < 100; i++){
+		addLinkedListTailNode(&game.food_head, createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, findRandomLinkedListNode(&game.food_texture_head)->data));
+	}
 
 	gameBeginLoop();
 
@@ -62,12 +74,12 @@ static void gameBeginLoop(){
 
 		updatePlayer();
 
-		if(getPlayerEatFruit(&game.fruit)){
-			while(isFruitOnSnake(game.fruit, &player_snake_head)){
-				printf("Fruit on snake!\n");
-				moveFruit(&game.fruit, rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT);
+		for(LinkedListNode* ptr = game.food_head; ptr != NULL; ptr = ptr->link){
+			for(LinkedListNode* snake_ptr = player_head; snake_ptr != NULL; snake_ptr = snake_ptr->link){
+				while(isFoodOnSnake(&snake_ptr, ptr->data)){
+					ptr->data = createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, findRandomLinkedListNode(&game.food_texture_head)->data);
+				}
 			}
-			printf("Fruit eaten!\n");
 		}
 
 		gameRender();
@@ -87,28 +99,10 @@ static void gameRender(){
 
 	SDL_RenderClear(main_renderer);
 
-	renderFruit(&game.fruit);
 	renderPlayer();
 
-	SDL_SetRenderDrawColor(main_renderer, 127, 127, 127, 255);
-
-	for(int i = 0; i <= GAME_AREA_HEIGHT; i++){
-		for(int j = 0; j <= GAME_AREA_WIDTH; j++){
-			SDL_Rect rect = {
-				.x = j * 8,
-				.y = i * 8,
-				.w = 8,
-				.h = 8,
-			};
-
-			if(i == 0 || i == GAME_AREA_HEIGHT){
-				SDL_RenderFillRect(main_renderer, &rect);
-			}
-
-			if(j == 0 || j == GAME_AREA_WIDTH){
-				SDL_RenderFillRect(main_renderer, &rect);
-			}
-		}
+	for(LinkedListNode* ptr = game.food_head; ptr != NULL; ptr = ptr->link){
+		renderFood(ptr->data);
 	}
 	
 	SDL_RenderPresent(main_renderer);

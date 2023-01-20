@@ -5,6 +5,7 @@
 
 static const unsigned int MAIN_WINDOW_WIDTH = 1280;
 static const unsigned int MAIN_WINDOW_HEIGHT = 720;
+static const char MAIN_WINDOW_TITLE[] = "Title";
 
 extern SDL_Window* main_window;
 

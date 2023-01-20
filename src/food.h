@@ -12,9 +12,8 @@ typedef struct Food {
 	SDL_Texture* texture;
 } Food;
 
-Food createFoodData(int x, int y, SDL_Texture* texture);
-void moveFood(Food* food, int x, int y);
+Food* createFood(int x, int y, SDL_Texture* texture);
 void renderFood(Food* food);
-char isFoodOnSnake(LinkedListNode** snake_head, Food food);
+int isFoodOnSnake(LinkedListNode** snake_head, Food* food);
 
 #endif

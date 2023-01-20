@@ -1,7 +1,7 @@
 #include "food.h"
-#include "linked_list.h"
 #include "renderer.h"
 #include "game.h"
+#include "snake.h"
 
 Food* createFood(int x, int y, SDL_Texture* texture){
 	Food* food = (Food*)malloc(sizeof(Food));
@@ -15,7 +15,16 @@ Food* createFood(int x, int y, SDL_Texture* texture){
 
 void renderFood(Food* food){
 	if(food->texture == NULL){
-		renderRectangle(food->x, food->y, 16, 16, 0xFF0000);
+		SDL_SetRenderDrawColor(main_renderer, 255, 0, 0, 255);
+
+		SDL_Rect rect = {
+			.x = food->x * 16 + 1,
+			.y = food->y * 16 + 1,
+			.w = 14,
+			.h = 14,
+		};
+
+		SDL_RenderFillRect(main_renderer, &rect);
 
 		return;
 	}
@@ -34,11 +43,13 @@ int isFoodOnSnake(LinkedListNode** snake_head, Food* food){
 	for(LinkedListNode* ptr = *snake_head; ptr != NULL; ptr = ptr->link){
 		if(food->x == ((SnakeData*)ptr->data)->x
 		&& food->y == ((SnakeData*)ptr->data)->y){
-			if(ptr == *snake_head){
-				return 1;
-			}
+			return 1;
 		}
 	}
 
 	return 0;
+}
+
+void freeFood(Food* food){
+	free(food);
 }

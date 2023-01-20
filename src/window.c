@@ -5,7 +5,7 @@
 SDL_Window* main_window = { 0 };
 
 int windowSetup(SDL_Window** window, const char* title, unsigned int width, unsigned int height){
-	*window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+	*window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 
 	if(*window == NULL){
 		printf("Window error: %s\n", SDL_GetError());

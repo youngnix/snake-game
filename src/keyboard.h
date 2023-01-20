@@ -18,5 +18,6 @@ void eventKeyUp(SDL_Event* event);
 unsigned char getKeyPressed(SDL_Scancode scancode);
 unsigned char getKeyReleased(SDL_Scancode scancode);
 unsigned char getKeyHeld(SDL_Scancode scancode);
+void keyboardCleanUp();
 
 #endif

@@ -1,15 +1,15 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "fruit.h"
+#include "food.h"
+#include "linked_list.h"
 #include "snake.h"
 
-extern SnakeSegment* player_snake_head;
+extern LinkedListNode* player_head;
 
 void updatePlayer();
-void updatePlayerDirection(char* direction_x, char* direction_y);
 void renderPlayer();
+void updatePlayerDirection();
 void movePlayer();
-char getPlayerEatFruit(Fruit* fruit);
 
 #endif

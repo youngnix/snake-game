@@ -38,3 +38,9 @@ unsigned char getKeyReleased(SDL_Scancode scancode){
 unsigned char getKeyHeld(SDL_Scancode scancode){
 	return keyboard.held_input[scancode];
 }
+
+void keyboardCleanUp(){
+	free(keyboard.held_input);
+	free(keyboard.pressed_input);
+	free(keyboard.released_input);
+}

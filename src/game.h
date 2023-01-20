@@ -1,7 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "fruit.h"
+#include "food.h"
+#include "linked_list.h"
 #include <SDL2/SDL.h>
 
 extern const unsigned int GAME_AREA_WIDTH;
@@ -9,10 +10,11 @@ extern const unsigned int GAME_AREA_HEIGHT;
 
 typedef struct {
 	unsigned char is_running;
-	Fruit fruit;
+	LinkedListNode* food_head;
+	LinkedListNode* food_texture_head;
 } Game;
 
-static Game game;
+extern Game game;
 
 int gameSetup();
 static void gameBeginLoop();
