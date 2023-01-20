@@ -2,11 +2,12 @@
 #define KEYBOARD_H
 
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 
 typedef struct {
-	unsigned char* pressed_input;
-	unsigned char* held_input;
-	unsigned char* released_input;
+	bool* pressed_input;
+	bool* held_input;
+	bool* released_input;
 } Keyboard;
 
 static Keyboard keyboard;

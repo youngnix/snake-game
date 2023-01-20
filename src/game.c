@@ -6,20 +6,28 @@
 #include "window.h"
 #include "player.h"
 #include "keyboard.h"
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_render.h>
-#include <stdlib.h>
+#include <dirent.h>
 
 const unsigned int GAME_AREA_WIDTH = 12;
 const unsigned int GAME_AREA_HEIGHT = 8;
 
-static char* food_sprite_list[] = { "res/apple.png", "res/cow.png", "res/python.png" };
-static const unsigned int FOOD_SPRITE_LIST_SIZE = 3;
+static const char* food_sprite_directory_path = "res/food";
 
 Game game = { 0 };
 
 int gameSetup(){
+	DIR* food_sprite_directory;
+	struct dirent* food_sprite_file;
+
+	food_sprite_directory = opendir(food_sprite_directory_path);
+	if(food_sprite_directory != NULL){
+		for(struct dirent* food_sprite_file; food_sprite_file != NULL; food_sprite_file = readdir(food_sprite_directory)){
+			printf("%s\n", food_sprite_file->d_name);
+		}
+
+		closedir(food_sprite_directory);
+	}
+
 	game.is_running = 1;
 
 	if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
@@ -35,9 +43,7 @@ int gameSetup(){
 		addLinkedListTailNode(&player_head, createSnakeData(0, 0, 0));
 	}
 
-	for(int i = 0; i < FOOD_SPRITE_LIST_SIZE; i++){
-		addLinkedListTailNode(&game.food_texture_head, IMG_LoadTexture(main_renderer, food_sprite_list[i]));
-	}
+
 
 	for(int i = 0; i < 100; i++){
 		addLinkedListTailNode(&game.food_head, createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, findRandomLinkedListNode(&game.food_texture_head)->data));

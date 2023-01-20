@@ -1,13 +1,11 @@
 #include "keyboard.h"
 
-#include <SDL2/SDL.h>
-
 static Keyboard keyboard = { NULL, NULL, NULL };
 
 void keyboardSetup(){
-	keyboard.held_input = (unsigned char*)malloc(sizeof(unsigned char) * 512);
-	keyboard.pressed_input = (unsigned char*)malloc(sizeof(unsigned char) * 512);
-	keyboard.released_input = (unsigned char*)malloc(sizeof(unsigned char) * 512);
+	keyboard.held_input = (bool*)malloc(sizeof(bool) * 512);
+	keyboard.pressed_input = (bool*)malloc(sizeof(bool) * 512);
+	keyboard.released_input = (bool*)malloc(sizeof(bool) * 512);
 }
 
 void clearKeyboard(){
