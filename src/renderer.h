@@ -3,9 +3,9 @@
 
 #include <SDL2/SDL.h>
 
-extern SDL_Renderer* main_renderer;
+extern SDL_Renderer* renderer;
 
-int rendererSetup(SDL_Renderer** renderer, SDL_Window** window);
+int rendererSetup();
 void renderRectangle(int x, int y, int width, int height, unsigned int color);
 
 #endif

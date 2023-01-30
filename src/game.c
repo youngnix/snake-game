@@ -1,53 +1,36 @@
 #include "game.h"
 #include "food.h"
 #include "linked_list.h"
-#include "renderer.h"
-#include "snake.h"
-#include "window.h"
 #include "player.h"
-#include "keyboard.h"
-#include <dirent.h>
+#include "snake.h"
 
-const unsigned int GAME_AREA_WIDTH = 12;
-const unsigned int GAME_AREA_HEIGHT = 8;
-
-static const char* food_sprite_directory_path = "res/food";
+const unsigned int GAME_AREA_WIDTH = 16;
+const unsigned int GAME_AREA_HEIGHT = 12;
 
 Game game = { 0 };
 
+static void gameBeginLoop();
+static int gameCleanUp();
+static void gameRender();
+static void gameUpdate();
+static void updateFood();
+
 int gameSetup(){
-	DIR* food_sprite_directory;
-	struct dirent* food_sprite_file;
-
-	food_sprite_directory = opendir(food_sprite_directory_path);
-	if(food_sprite_directory != NULL){
-		for(struct dirent* food_sprite_file; food_sprite_file != NULL; food_sprite_file = readdir(food_sprite_directory)){
-			printf("%s\n", food_sprite_file->d_name);
-		}
-
-		closedir(food_sprite_directory);
-	}
-
 	game.is_running = 1;
 
+	srand(time(NULL));
+
 	if(SDL_Init(SDL_INIT_EVERYTHING) == -1){
-		printf("SDL Error: %s\n", SDL_GetError());
-		return 1;
+		fprintf(stderr, "SDL Error: %s\n", SDL_GetError());
+		return -1;
 	}
 
-	windowSetup(&main_window, MAIN_WINDOW_TITLE, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-	rendererSetup(&main_renderer, &main_window);
+	windowSetup();
+	rendererSetup();
 	keyboardSetup();
 
-	for(int i = 0; i < 2; i++){
-		addLinkedListTailNode(&player_head, createSnakeData(0, 0, 0));
-	}
-
-
-
-	for(int i = 0; i < 100; i++){
-		addLinkedListTailNode(&game.food_head, createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, findRandomLinkedListNode(&game.food_texture_head)->data));
-	}
+	player_head = createLinkedListNode(createSnakeSegment(GAME_AREA_WIDTH / 2, GAME_AREA_HEIGHT / 2, 0));
+	game.food_head = createLinkedListNode(createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, NULL));
 
 	gameBeginLoop();
 
@@ -62,54 +45,72 @@ static void gameBeginLoop(){
 
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
-				case SDL_KEYUP:
-					eventKeyUp(&event);
+			case SDL_KEYUP:
+				eventKeyUp(&event);
 				break;
-				case SDL_KEYDOWN:
-					if(!event.key.repeat){
-						eventKeyDown(&event);
-					}
+			case SDL_KEYDOWN:
+				if(!event.key.repeat)
+					eventKeyDown(&event);
 				break;
-				case SDL_QUIT:
-					game.is_running = 0;
+			case SDL_QUIT:
+				game.is_running = 0;
 				break;
-				default:
+			default:
 				break;
 			}
 		}
 
-		updatePlayer();
+		if(getKeyPressed(SDL_SCANCODE_Q))
+			game.is_running = 0;
 
-		for(LinkedListNode* ptr = game.food_head; ptr != NULL; ptr = ptr->link){
-			for(LinkedListNode* snake_ptr = player_head; snake_ptr != NULL; snake_ptr = snake_ptr->link){
-				while(isFoodOnSnake(&snake_ptr, ptr->data)){
-					ptr->data = createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, findRandomLinkedListNode(&game.food_texture_head)->data);
-				}
-			}
-		}
-
+		gameUpdate();
 		gameRender();
 	}
 }
 
-int gameCleanUp(){
-	SDL_DestroyRenderer(main_renderer);
-	SDL_DestroyWindow(main_window);
-	SDL_Quit();
+static void updateFood(){
+	if(game.food_head == NULL)
+		return;
+	
+	for(LinkedListNode* segment_ptr = player_head; segment_ptr != NULL; segment_ptr = segment_ptr->link){
+		for(LinkedListNode* food_ptr = game.food_head; food_ptr != NULL; food_ptr = food_ptr->link){
+			if(!isSnakeSegmentOnFood(segment_ptr->data, food_ptr->data))
+				break;
 
-	return 0;
+			food_ptr->data = createFood(rand() % GAME_AREA_WIDTH, rand() % GAME_AREA_HEIGHT, NULL);
+		}
+	}
+}
+
+static void gameUpdate(){
+	updatePlayer();
+	updateFood();
 }
 
 static void gameRender(){
-	SDL_SetRenderDrawColor(main_renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-	SDL_RenderClear(main_renderer);
+	SDL_RenderClear(renderer);
 
 	renderPlayer();
 
 	for(LinkedListNode* ptr = game.food_head; ptr != NULL; ptr = ptr->link){
+		if(ptr == NULL)
+			break;
+		
 		renderFood(ptr->data);
 	}
-	
-	SDL_RenderPresent(main_renderer);
+
+	SDL_RenderPresent(renderer);
+}
+
+static int gameCleanUp(){
+	freeLinkedList(player_head);
+	freeLinkedList(game.food_head);
+
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+	return 0;
 }

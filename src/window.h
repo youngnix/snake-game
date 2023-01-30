@@ -3,12 +3,13 @@
 
 #include <SDL2/SDL.h>
 
-static const unsigned int MAIN_WINDOW_WIDTH = 1280;
-static const unsigned int MAIN_WINDOW_HEIGHT = 720;
-static const char MAIN_WINDOW_TITLE[] = "Title";
+static unsigned int window_width = 1280;
+static unsigned int window_height = 720;
+extern const unsigned int WINDOW_SCALE_MULTIPLIER;
+static const char WINDOW_TITLE[] = "Title";
 
-extern SDL_Window* main_window;
+extern SDL_Window* window;
 
-int windowSetup(SDL_Window** window, const char* title, unsigned int width, unsigned int height);
+int windowSetup();
 
 #endif

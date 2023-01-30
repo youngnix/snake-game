@@ -1,6 +1,9 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct LinkedListNode LinkedListNode;
 
 typedef struct LinkedListNode {
@@ -9,12 +12,14 @@ typedef struct LinkedListNode {
 } LinkedListNode;
 
 LinkedListNode* createLinkedListNode(void* data);
-void addLinkedListHeadNode(LinkedListNode** linked_list_head_node, void* data);
-void addLinkedListTailNode(LinkedListNode** linked_list_head_node, void* data);
-int getLinkedListNodeCount(LinkedListNode** linked_list_head_node);
-LinkedListNode* findPreviousLinkedListNode(LinkedListNode** linked_list_head_node, LinkedListNode** linked_list_node);
-LinkedListNode* findLinkedListTailNode(LinkedListNode** linked_list_head_node);
-void removeLinkedListNode(LinkedListNode** linked_list_head_node, LinkedListNode** linked_list_node);
-LinkedListNode* findRandomLinkedListNode(LinkedListNode** linked_list_head_node);
+int pushFrontLinkedListNode(LinkedListNode** head, void* data);
+int pushBackLinkedListNode(LinkedListNode* head, void* data);
+int popFrontLinkedListNode(LinkedListNode** head);
+int popBackLinkedListNode(LinkedListNode* head);
+int popLinkedListNode(LinkedListNode* head, LinkedListNode* node);
+int getLinkedListNodeCount(LinkedListNode* head);
+LinkedListNode* findPreviousLinkedListNode(LinkedListNode* head, LinkedListNode* node);
+LinkedListNode* findLastLinkedListNode(LinkedListNode* head);
+void freeLinkedList(LinkedListNode* head);
 
 #endif

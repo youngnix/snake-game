@@ -3,9 +3,9 @@
 static Keyboard keyboard = { NULL, NULL, NULL };
 
 void keyboardSetup(){
-	keyboard.held_input = (bool*)malloc(sizeof(bool) * 512);
-	keyboard.pressed_input = (bool*)malloc(sizeof(bool) * 512);
-	keyboard.released_input = (bool*)malloc(sizeof(bool) * 512);
+	keyboard.held_input = (bool*)calloc(512, sizeof(bool));
+	keyboard.pressed_input = (bool*)calloc(512, sizeof(bool));
+	keyboard.released_input = (bool*)calloc(512, sizeof(bool));
 }
 
 void clearKeyboard(){

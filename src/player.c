@@ -4,89 +4,105 @@
 #include "linked_list.h"
 #include "snake.h"
 #include "renderer.h"
+#include "window.h"
 
 const static unsigned int MINIMUM_CYCLE_COUNT = 10;
 
-LinkedListNode* player_head;
+LinkedListNode* player_head = NULL;
 
 void updatePlayer(){
+	if(player_head == NULL)
+		return;
+
 	static int tick_counter = 0;
 
-	updatePlayerDirection();
+	static unsigned char next_direction = 0;
+
+	if(getPlayerDirection() != ((SnakeSegment*)player_head->data)->direction)
+		next_direction = getPlayerDirection();
 
 	if(tick_counter >= MINIMUM_CYCLE_COUNT){
 		tick_counter = 0;
 
-		movePlayer();
-	}
+		player_head->data = createSnakeSegment(((SnakeSegment*)player_head->data)->x, ((SnakeSegment*)player_head->data)->y, next_direction);
 
+		movePlayer();
+		playerEatItself();
+	}
+	
 	tick_counter++;
 }
 
 void renderPlayer(){
-	SnakeData* snake_data;
-	for(LinkedListNode* ptr = player_head->link; ptr != NULL; ptr = ptr->link){
-		snake_data = (SnakeData*)ptr->data;
-
-		renderRectangle(snake_data->x * 16 + 1, snake_data->y * 16 + 1, 14, 14, 0xFFFFFFFF);
-	}
-
-	snake_data = (SnakeData*)player_head->data;
-
-	renderRectangle(snake_data->x * 16 + 1, snake_data->y * 16 + 1, 14, 14, 0x00FF00FF);
+	if(player_head == NULL)
+		return;
+	
+	for(LinkedListNode* ptr = player_head; ptr != NULL; ptr = ptr->link)
+		renderSnakeSegment(ptr->data);
 }
 
-void updatePlayerDirection(){
-	if(((SnakeData*)player_head->data)->direction != 'r' && getKeyPressed(SDL_SCANCODE_LEFT)){
-		((SnakeData*)player_head->data)->direction = 'l';
-	}
+unsigned char getPlayerDirection(){
+	SnakeSegment* head_data = player_head->data;
 
-	if(((SnakeData*)player_head->data)->direction != 'l' && getKeyPressed(SDL_SCANCODE_RIGHT)){
-		((SnakeData*)player_head->data)->direction = 'r';
-	}
+	if(head_data->direction != 'r' && getKeyPressed(SDL_SCANCODE_LEFT))
+		return 'l';
 
-	if(((SnakeData*)player_head->data)->direction != 'u' && getKeyPressed(SDL_SCANCODE_DOWN)){
-		((SnakeData*)player_head->data)->direction = 'd';
-	}
+	if(head_data->direction != 'l' && getKeyPressed(SDL_SCANCODE_RIGHT))
+		return 'r';
 
-	if(((SnakeData*)player_head->data)->direction != 'd' && getKeyPressed(SDL_SCANCODE_UP)){
-		((SnakeData*)player_head->data)->direction = 'u';
-	}
-}
+	if(head_data->direction != 'u' && getKeyPressed(SDL_SCANCODE_DOWN))
+		return 'd';
+	
+	if(head_data->direction != 'd' && getKeyPressed(SDL_SCANCODE_UP))
+		return 'u';
 
-int didPlayerEatFood(){
-	for(LinkedListNode* ptr = game.food_head; ptr != NULL; ptr = ptr->link){
-		if(isFoodOnSnake(&player_head, ptr->data)){
-			return 1;
-		}
-	}
-
-	return 0;
+	return head_data->direction;
 }
 
 void movePlayer(){
-	SnakeData* player_data = (SnakeData*)player_head->data;
-	LinkedListNode* player_tail = findLinkedListTailNode(&player_head);
+	SnakeSegment* segment = player_head->data;
 
-	switch(player_data->direction){
-		case 'u':
-			addLinkedListHeadNode(&player_head, createSnakeData(player_data->x, player_data->y - 1, player_data->direction));
+	switch(segment->direction){
+	case 'u':
+		pushFrontLinkedListNode(&player_head, createSnakeSegment(segment->x, (segment->y - 1 + GAME_AREA_HEIGHT) % GAME_AREA_HEIGHT, segment->direction));
 		break;
-		case 'l':
-			addLinkedListHeadNode(&player_head, createSnakeData(player_data->x - 1, player_data->y, player_data->direction));
+	case 'l':
+		pushFrontLinkedListNode(&player_head, createSnakeSegment((segment->x - 1 + GAME_AREA_WIDTH) % GAME_AREA_WIDTH, segment->y, segment->direction));
 		break;
-		case 'd':
-			addLinkedListHeadNode(&player_head, createSnakeData(player_data->x, player_data->y + 1, player_data->direction));
+	case 'd':
+		pushFrontLinkedListNode(&player_head, createSnakeSegment(segment->x, (segment->y + 1 + GAME_AREA_HEIGHT) % GAME_AREA_HEIGHT, segment->direction));
 		break;
-		case 'r':
-			addLinkedListHeadNode(&player_head, createSnakeData(player_data->x + 1, player_data->y, player_data->direction));
+	case 'r':
+		pushFrontLinkedListNode(&player_head, createSnakeSegment((segment->x + 1 + GAME_AREA_WIDTH) % GAME_AREA_WIDTH, segment->y, segment->direction));
 		break;
-		default:
-			addLinkedListHeadNode(&player_head, createSnakeData(player_data->x, player_data->y, player_data->direction));
+	default:
+		pushFrontLinkedListNode(&player_head, createSnakeSegment(segment->x, segment->y, segment->direction));
 		break;
 	}
+}
 
-	if(!didPlayerEatFood()){
-		removeLinkedListNode(&player_head, &player_tail);
+void playerEatItself(){
+	SnakeSegment* player_data = player_head->data;
+
+	for(LinkedListNode* ptr = player_head->link; ptr != NULL; ptr = ptr->link){
+		SnakeSegment* ptr_data = ptr->data;
+		
+		if(ptr_data->x != player_data->x
+		   || ptr_data->y != player_data->y)
+			continue;
+		
+		for(;;){
+			LinkedListNode* last_node = findLastLinkedListNode(player_head);
+
+			popLinkedListNode(player_head, last_node);
+
+			if(last_node == ptr)
+				return;
+		}
+	}
+	
+	for(LinkedListNode* food_ptr = game.food_head; food_ptr != NULL; food_ptr = food_ptr->link){
+		if(!isSnakeSegmentOnFood(player_head->data, food_ptr->data))
+			popBackLinkedListNode(player_head);
 	}
 }

@@ -7,9 +7,11 @@
 
 extern LinkedListNode* player_head;
 
+void playerTexturesSetup();
 void updatePlayer();
 void renderPlayer();
-void updatePlayerDirection();
+unsigned char getPlayerDirection();
 void movePlayer();
+void playerEatItself();
 
 #endif

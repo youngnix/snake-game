@@ -1,15 +1,19 @@
 #ifndef SNAKE_H
 #define SNAKE_H
 
+#include "food.h"
+#include "linked_list.h"
 #include <SDL2/SDL.h>
 
-typedef struct SnakeData SnakeData;
+typedef struct SnakeSegment SnakeSegment;
 
-typedef struct SnakeData {
+typedef struct SnakeSegment {
 	int x, y;
-	char direction;
-} SnakeData;
+	unsigned char direction;
+} SnakeSegment;
 
-SnakeData* createSnakeData(int x, int y, char direction);
+SnakeSegment* createSnakeSegment(int x, int y, unsigned char direction);
+void renderSnakeSegment(SnakeSegment* segment);
+int isSnakeSegmentOnFood(SnakeSegment* segment, Food* food);
 
 #endif
